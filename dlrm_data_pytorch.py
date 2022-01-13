@@ -81,7 +81,8 @@ class CriteoDataset(Dataset):
         # split the datafile into path and filename
         lstr = raw_path.split("/")
         self.d_path = "/".join(lstr[0:-1]) + "/"
-        self.d_file = lstr[-1].split(".")[0] if dataset == "kaggle" else lstr[-1]
+        self.d_file = lstr[-1].split(
+            ".")[0] if dataset == "kaggle" else lstr[-1]
         self.npzfile = self.d_path + (
             (self.d_file + "_day") if dataset == "kaggle" else self.d_file
         )
@@ -140,11 +141,12 @@ class CriteoDataset(Dataset):
             elif split == 'test' or split == 'val':
                 self.day = days - 1
                 num_samples = self.offset_per_file[days] - \
-                              self.offset_per_file[days - 1]
+                    self.offset_per_file[days - 1]
                 self.test_size = int(np.ceil(num_samples / 2.))
                 self.val_size = num_samples - self.test_size
             else:
-                sys.exit("ERROR: dataset split is neither none, nor train or test.")
+                sys.exit(
+                    "ERROR: dataset split is neither none, nor train or test.")
 
             '''
             # text
@@ -186,7 +188,9 @@ class CriteoDataset(Dataset):
                 self.counts = data["counts"]
             self.m_den = den_fea  # X_int.shape[1]
             self.n_emb = len(self.counts)
-            print("Sparse features= %d, Dense features= %d" % (self.n_emb, self.m_den))
+            print(
+                "Sparse features= %d, Dense features= %d" %
+                (self.n_emb, self.m_den))
 
             # Load the test data
             # Only a single day is used for testing
@@ -290,7 +294,8 @@ class CriteoDataset(Dataset):
                 # only a single day is used for testing
                 i = index + (0 if self.split == 'test' else self.test_size)
             else:
-                sys.exit("ERROR: dataset split is neither none, nor train or test.")
+                sys.exit(
+                    "ERROR: dataset split is neither none, nor train or test.")
         else:
             i = index
 
@@ -320,7 +325,8 @@ class CriteoDataset(Dataset):
             elif self.split == 'val':
                 return self.val_size
             else:
-                sys.exit("ERROR: dataset split is neither none, nor train nor test.")
+                sys.exit(
+                    "ERROR: dataset split is neither none, nor train nor test.")
         else:
             return len(self.y)
 
@@ -644,7 +650,8 @@ class RandomDataset(Dataset):
             self.reset_numpy_seed(self.rand_seed)
 
         # number of data points in a batch
-        n = min(self.mini_batch_size, self.data_size - (index * self.mini_batch_size))
+        n = min(self.mini_batch_size, self.data_size -
+                (index * self.mini_batch_size))
 
         # generate a batch of dense and sparse features
         if self.data_generation == "random":
@@ -672,11 +679,13 @@ class RandomDataset(Dataset):
             )
         else:
             sys.exit(
-                "ERROR: --data-generation=" + self.data_generation + " is not supported"
-            )
+                "ERROR: --data-generation=" +
+                self.data_generation +
+                " is not supported")
 
         # generate a batch of target (probability of a click)
-        T = generate_random_output_batch(n, self.num_targets, self.round_targets)
+        T = generate_random_output_batch(
+            n, self.num_targets, self.round_targets)
 
         return (X, lS_o, lS_i, T)
 
@@ -705,8 +714,8 @@ def collate_wrapper_random_length(list_of_tuples):
 
 
 def make_random_data_and_loader(args, ln_emb, m_den,
-    offset_to_length_converter=False,
-):
+                                offset_to_length_converter=False,
+                                ):
 
     train_data = RandomDataset(
         m_den,
@@ -791,7 +800,7 @@ def generate_random_data(
     data_generation="random",
     trace_file="",
     enable_padding=False,
-    length=False, # length for caffe2 version (except dlrm_s_caffe2)
+    length=False,  # length for caffe2 version (except dlrm_s_caffe2)
 ):
     nbatches = int(np.ceil((data_size * 1.0) / mini_batch_size))
     if num_batches != 0:
@@ -830,8 +839,9 @@ def generate_random_data(
             )
         else:
             sys.exit(
-                "ERROR: --data-generation=" + data_generation + " is not supported"
-            )
+                "ERROR: --data-generation=" +
+                data_generation +
+                " is not supported")
         # dense feature
         lX.append(Xt)
         # sparse feature (sparse indices)
@@ -848,7 +858,12 @@ def generate_random_data(
 def generate_random_output_batch(n, num_targets, round_targets=False):
     # target (probability of a click)
     if round_targets:
-        P = np.round(ra.rand(n, num_targets).astype(np.float32)).astype(np.float32)
+        P = np.round(
+            ra.rand(
+                n,
+                num_targets).astype(
+                np.float32)).astype(
+            np.float32)
     else:
         P = ra.rand(n, num_targets).astype(np.float32)
 
@@ -889,10 +904,11 @@ def generate_uniform_input_batch(
             # sparse indices to be used per embedding
             r = ra.random(sparse_group_size)
             sparse_group = np.unique(np.round(r * (size - 1)).astype(np.int64))
-            # reset sparse_group_size in case some index duplicates were removed
+            # reset sparse_group_size in case some index duplicates were
+            # removed
             sparse_group_size = np.int32(sparse_group.size)
             # store lengths and indices
-            if length: # for caffe2 version
+            if length:  # for caffe2 version
                 lS_batch_offsets += [sparse_group_size]
             else:
                 lS_batch_offsets += [offset]
@@ -949,12 +965,14 @@ def generate_dist_input_batch(
                 sparse_group = np.unique(sparse_group).astype(np.int64)
             elif rand_data_dist == "uniform":
                 r = ra.random(sparse_group_size)
-                sparse_group = np.unique(np.round(r * (size - 1)).astype(np.int64))
+                sparse_group = np.unique(
+                    np.round(r * (size - 1)).astype(np.int64))
             else:
                 raise(rand_data_dist, "distribution is not supported. \
                      please select uniform or gaussian")
 
-            # reset sparse_group_size in case some index duplicates were removed
+            # reset sparse_group_size in case some index duplicates were
+            # removed
             sparse_group_size = np.int64(sparse_group.size)
             # store lengths and indices
             lS_batch_offsets += [offset]
@@ -1014,8 +1032,11 @@ def generate_synthetic_input_batch(
             # )
             # approach 2: lru
             r = trace_generate_lru(
-                line_accesses, list_sd, cumm_sd, sparse_group_size, enable_padding
-            )
+                line_accesses,
+                list_sd,
+                cumm_sd,
+                sparse_group_size,
+                enable_padding)
             # WARNING: if the distribution in the file is not consistent
             # with embedding table dimensions, below mod guards against out
             # of range access
@@ -1029,7 +1050,8 @@ def generate_synthetic_input_batch(
                 )
                 sparse_group = np.mod(sparse_group, size).astype(np.int64)
             # sparse_group = np.unique(np.array(np.mod(r, size-1)).astype(np.int64))
-            # reset sparse_group_size in case some index duplicates were removed
+            # reset sparse_group_size in case some index duplicates were
+            # removed
             sparse_group_size = np.int64(sparse_group.size)
             # store lengths and indices
             lS_batch_offsets += [offset]
@@ -1042,17 +1064,25 @@ def generate_synthetic_input_batch(
     return (Xt, lS_emb_offsets, lS_emb_indices)
 
 
-def generate_stack_distance(cumm_val, cumm_dist, max_i, i, enable_padding=False):
+def generate_stack_distance(
+        cumm_val,
+        cumm_dist,
+        max_i,
+        i,
+        enable_padding=False):
     u = ra.rand(1)
     if i < max_i:
-        # only generate stack distances up to the number of new references seen so far
+        # only generate stack distances up to the number of new references seen
+        # so far
         j = bisect.bisect(cumm_val, i) - 1
         fi = cumm_dist[j]
         u *= fi  # shrink distribution support to exclude last values
     elif enable_padding:
-        # WARNING: disable generation of new references (once all have been seen)
+        # WARNING: disable generation of new references (once all have been
+        # seen)
         fi = cumm_dist[0]
-        u = (1.0 - fi) * u + fi  # remap distribution support to exclude first value
+        # remap distribution support to exclude first value
+        u = (1.0 - fi) * u + fi
 
     for (j, f) in enumerate(cumm_dist):
         if u <= f:
@@ -1071,7 +1101,8 @@ def trace_generate_lru(
     i = 0
     ztrace = deque()
     for _ in range(out_trace_len):
-        sd = generate_stack_distance(list_sd, cumm_sd, max_sd, i, enable_padding)
+        sd = generate_stack_distance(
+            list_sd, cumm_sd, max_sd, i, enable_padding)
         mem_ref_within_line = 0  # floor(ra.rand(1)*cache_line_size) #0
 
         # generate memory reference
@@ -1079,11 +1110,17 @@ def trace_generate_lru(
             line_ref = line_accesses[0]
             del line_accesses[0]
             line_accesses.append(line_ref)
-            mem_ref = np.uint64(line_ref * cache_line_size + mem_ref_within_line)
+            mem_ref = np.uint64(
+                line_ref *
+                cache_line_size +
+                mem_ref_within_line)
             i += 1
         else:  # existing reference #
             line_ref = line_accesses[l - sd]
-            mem_ref = np.uint64(line_ref * cache_line_size + mem_ref_within_line)
+            mem_ref = np.uint64(
+                line_ref *
+                cache_line_size +
+                mem_ref_within_line)
             del line_accesses[l - sd]
             line_accesses.append(line_ref)
         # save generated memory reference
@@ -1100,17 +1137,24 @@ def trace_generate_rand(
     i = 0
     ztrace = []
     for _ in range(out_trace_len):
-        sd = generate_stack_distance(list_sd, cumm_sd, max_sd, i, enable_padding)
+        sd = generate_stack_distance(
+            list_sd, cumm_sd, max_sd, i, enable_padding)
         mem_ref_within_line = 0  # floor(ra.rand(1)*cache_line_size) #0
         # generate memory reference
         if sd == 0:  # new reference #
             line_ref = line_accesses.pop(0)
             line_accesses.append(line_ref)
-            mem_ref = np.uint64(line_ref * cache_line_size + mem_ref_within_line)
+            mem_ref = np.uint64(
+                line_ref *
+                cache_line_size +
+                mem_ref_within_line)
             i += 1
         else:  # existing reference #
             line_ref = line_accesses[l - sd]
-            mem_ref = np.uint64(line_ref * cache_line_size + mem_ref_within_line)
+            mem_ref = np.uint64(
+                line_ref *
+                cache_line_size +
+                mem_ref_within_line)
         ztrace.append(mem_ref)
 
     return ztrace
@@ -1187,7 +1231,7 @@ def write_trace_to_file(file_path, trace):
         else:
             with open(file_path, "w+") as f:
                 s = str(list(trace))
-                f.write(s[1 : len(s) - 1])
+                f.write(s[1: len(s) - 1])
     except Exception:
         print("ERROR: no output trace file has been provided")
 
@@ -1212,13 +1256,13 @@ def write_dist_to_file(file_path, unique_accesses, list_sd, cumm_sd):
         with open(file_path, "w") as f:
             # unique_acesses
             s = str(list(unique_accesses))
-            f.write(s[1 : len(s) - 1] + "\n")
+            f.write(s[1: len(s) - 1] + "\n")
             # list_sd
             s = str(list_sd)
-            f.write(s[1 : len(s) - 1] + "\n")
+            f.write(s[1: len(s) - 1] + "\n")
             # cumm_sd
             s = str(list(cumm_sd))
-            f.write(s[1 : len(s) - 1] + "\n")
+            f.write(s[1: len(s) - 1] + "\n")
     except Exception:
         print("Wrong file or file path")
 
@@ -1228,7 +1272,8 @@ if __name__ == "__main__":
     import argparse
 
     ### parse arguments ###
-    parser = argparse.ArgumentParser(description="Generate Synthetic Distributions")
+    parser = argparse.ArgumentParser(
+        description="Generate Synthetic Distributions")
     parser.add_argument("--trace-file", type=str, default="./input/trace.log")
     parser.add_argument("--trace-file-binary-type", type=bool, default=False)
     parser.add_argument("--trace-enable-padding", type=bool, default=False)
@@ -1261,8 +1306,8 @@ if __name__ == "__main__":
     # count items
     l = len(stack_distances)
     dc = sorted(
-        collections.Counter(stack_distances).items(), key=operator.itemgetter(0)
-    )
+        collections.Counter(stack_distances).items(),
+        key=operator.itemgetter(0))
 
     # create a distribution
     list_sd = list(map(lambda tuple_x_k: tuple_x_k[0], dc))  # x = tuple_x_k[0]
