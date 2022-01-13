@@ -2,11 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 # For distributed run
 import extend_distributed as ext_dist
-import mlperf_logger
 
 # numpy
 import numpy as np
-import sklearn.metrics
 import sys
 
 # pytorch
@@ -18,6 +16,7 @@ from torch.nn.parallel.replicate import replicate
 from torch.nn.parallel.scatter_gather import gather, scatter
 from torch.nn.parameter import Parameter
 import torch.nn as nn
+import torch.nn.functional as F
 import colossalai
 
 def md_solver(n, alpha, d0=None, B=None, round_dim=True, k=None):

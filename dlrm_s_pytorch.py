@@ -90,7 +90,6 @@ from torch.nn.parameter import Parameter
 from torch.optim.lr_scheduler import _LRScheduler
 import optim.rwsadagrad as RowWiseSparseAdagrad
 from torch.utils.tensorboard import SummaryWriter
-from colossalai import nn as col_nn
 
 # mixed-dimension trick
 from tricks.md_embedding_bag import PrEmbeddingBag, md_solver
@@ -202,7 +201,7 @@ class DLRM_Net(nn.Module):
             m = ln[i + 1]
 
             # construct fully connected operator
-            LL = col_nn.Linear(int(n), int(m), bias=True)
+            LL = nn.Linear(int(n), int(m), bias=True)
 
             # initialize the weights
             # with torch.no_grad():
